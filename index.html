@@ -43,24 +43,42 @@
       let images = document.querySelectorAll(".slideshow");
       let index = 0;
       let loadedImages = 0;
+      let totalImages = images.length;
+      let interval; // Store interval reference
 
       function showNextImage() {
         images[index].classList.remove("active");
-        index = (index + 1) % images.length;
+        index = (index + 1) % totalImages;
         images[index].classList.add("active");
       }
 
-      // Ensure all images are loaded before starting the slideshow
+      function startSlideshow() {
+        images[0].classList.add("active"); // Ensure first image is visible
+        if (!interval) {
+          interval = setInterval(showNextImage, 6000); // Ensure only one interval starts
+        }
+      }
+
+      // Preload all images before starting the slideshow
       images.forEach((img) => {
-        img.onload = function () {
-          loadedImages++;
-          if (loadedImages === images.length) {
-            // Once all images are loaded, show the first image and start slideshow
-            images[0].classList.add("active");
-            setInterval(showNextImage, 3000);
-          }
-        };
+        if (img.complete) {
+          loadedImages++; // If already cached, count it
+        } else {
+          img.onload = function () {
+            loadedImages++;
+            if (loadedImages === totalImages) {
+              startSlideshow();
+            }
+          };
+        }
       });
+
+      // Fallback: Start after 3 seconds in case GitHub Pages caches images
+      setTimeout(() => {
+        if (loadedImages < totalImages) {
+          startSlideshow();
+        }
+      }, 3000);
     </script>
   </body>
 </html>
