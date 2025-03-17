@@ -24,21 +24,24 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         transform: translateX(100%);
         transition: transform 1s ease-in-out;
+        opacity: 0;
       }
       .active {
         transform: translateX(0);
+        opacity: 1;
       }
       .prev {
         transform: translateX(-100%);
+        opacity: 0;
       }
     </style>
   </head>
   <body>
     <div class="slideshow-container">
-      <img src="./assets/1_1_compressed.jpg" class="slideshow active" />
+      <img src="./assets/1_1_compressed.jpg" class="slideshow" />
       <img src="./assets/2_2_compressed.jpg" class="slideshow" />
       <img src="./assets/3_3_compressed.jpg" class="slideshow" />
       <img src="./assets/4_4_compressed.jpg" class="slideshow" />
@@ -56,6 +59,7 @@
       let images = document.querySelectorAll(".slideshow");
       let index = 0;
       let totalImages = images.length;
+      let loadedImages = 0;
       let interval;
 
       function showNextImage() {
@@ -72,12 +76,28 @@
       }
 
       function startSlideshow() {
-        if (!interval) {
-          interval = setInterval(showNextImage, 6000);
-        }
+        images.forEach((img) => (img.style.opacity = "1")); // Ensure all images are visible
+        images[0].classList.add("active"); // Make the first image visible
+        interval = setInterval(showNextImage, 8000);
       }
 
-      startSlideshow();
+      images.forEach((img) => {
+        img.onload = function () {
+          loadedImages++;
+          if (loadedImages === totalImages) {
+            startSlideshow();
+          }
+        };
+        if (img.complete) {
+          loadedImages++;
+        }
+      });
+
+      setTimeout(() => {
+        if (loadedImages < totalImages) {
+          startSlideshow();
+        }
+      }, 3000);
     </script>
   </body>
 </html>
